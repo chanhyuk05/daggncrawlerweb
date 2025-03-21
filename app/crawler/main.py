@@ -1,10 +1,14 @@
 import json
+import os
+import platform
+import time
 
 import click
 import questionary
 
 from app.crawler.crawl import get_items
 from app.crawler.location import get_location
+from app.crawler.save import save_as_excel
 
 
 @click.command()
@@ -27,16 +31,25 @@ def crawl():
         ).ask()
         selected_loc = next(loc for loc in location_choices if loc["label"] == selected_location)
         location_id = f"{selected_loc['name']}-{selected_loc['id']}"
-        
-    print(f"선택된 지역: {location_id}")
 
     amount = int(questionary.text("크롤링할 아이템 수를 입력하세요 (기본값 10):", default="10").ask())
     keyword = questionary.text("검색어를 입력하세요:").ask()
-    output = questionary.text("출력 파일명을 입력하세요 (기본값: output.csv):", default="output.csv").ask()
 
-    results = get_items(location_id, amount, keyword, output)
+    results = get_items(location_id, amount, keyword)
     
-    print('results', json.dumps(results, indent=2, ensure_ascii=False))
+    # print(json.dumps(results, ensure_ascii=False , indent=2))
+    
+    save_as_excel(results)
+    
+    print(f"output.xlsx 파일로 저장되었습니다.")
+    
+    output_file = "output.xlsx"
+    if platform.system() == "Darwin":  # macOS
+        os.system(f"open {output_file}")
+    elif platform.system() == "Windows":
+        os.startfile(output_file)
+    else:  # Linux
+        os.system(f"xdg-open {output_file}")
 
 
 if __name__ == '__main__':
