@@ -1,5 +1,4 @@
 import time
-from email.mime import image
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options

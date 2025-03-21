@@ -6,9 +6,9 @@ import time
 import click
 import questionary
 
-from app.crawler.crawl import get_items
-from app.crawler.location import get_location
-from app.crawler.save import save_as_excel
+from app.crawl import get_items
+from app.location import get_location
+from app.save import save_as_excel
 
 
 @click.command()
