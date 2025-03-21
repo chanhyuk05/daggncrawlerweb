@@ -15,6 +15,7 @@ curl -sSL https://install.python-poetry.org | python3 -
 ```sh
 git clone https://github.com/jwkwon0817/daangn-crawler
 cd daangn-crawler
+poetry install
 ```
 
 ## 3. Run
