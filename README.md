@@ -10,6 +10,8 @@ curl -sSL https://install.python-poetry.org | python3 -
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
 ```
 
+Reference: https://python-poetry.org/docs/#installing-with-the-official-installer
+
 ## 2. Installation
 
 ```sh
