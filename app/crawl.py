@@ -3,13 +3,17 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 
-def get_items(location_id: str, amount: int, search_keyword: str):
+def get_items(location_id: str, amount: int, search_keyword: str, start_price: int, end_price: int):
     print('크롤링 중...')
-    url = f"https://www.daangn.com/kr/buy-sell/?in={location_id}&search={search_keyword}"
+    
+    url = f"https://www.daangn.com/kr/buy-sell/?in={location_id}&only_on_sale=true&search={search_keyword}"
+    
+    if start_price and end_price:
+      url += f'&price={start_price}__{end_price}'
+      
+    # print(url)
 
     options = Options()
     options.add_argument("--headless")
@@ -61,50 +65,47 @@ def get_items(location_id: str, amount: int, search_keyword: str):
               price = price[:-1]
             
             link = article.get_attribute("href")
-            # try:
-            #     img_element = WebDriverWait(article, 5).until(
-            #         lambda el: el.find_element(By.CSS_SELECTOR, 'article > div:first-of-type > div > span > img')
-            #     )
-            #     image = WebDriverWait(img_element, 5).until(
-            #         lambda el: el.get_attribute("src") or el.get_attribute("data-src")
-            #     )
-            #     if image and "&f=webp" in image:
-            #         image = image.replace("&f=webp", "")
-            # except:
-            #     image = None
             
             if not link:
                 continue
-            
-            try:
-                status = article.find_element(By.CSS_SELECTOR, 'article > div:first-of-type > span')
-                
-                if status:
-                  results.append({
-                    "title": title,
-                    "price": price,
-                    "status": status.text,
-                    "link": link,
-                    # "image": image
-                  })
-                else:
-                  results.append({
-                    "title": title,
-                    "price": price,
-                    "status": "구매 가능",
-                    "link": link,
-                    # "image": image
-                  })
-            except:
-                results.append({
-                    "title": title,
-                    "price": price,
-                    "status": "구매 가능",
-                    "link": link,
-                    # "image": image
-                })
+              
+            results.append({
+              "title": title,
+              "price": price,
+              "link": link,
+            })
         except Exception as e:
             print(f"{idx}. Error extracting article details: {e}")
+            
+    for result in results:
+      driver.get(result['link'])
+      
+      time_text = driver.find_element(By.CSS_SELECTOR, 'time').text
+      description = driver.find_element(By.CSS_SELECTOR, 'article > div:nth-child(1) > div:nth-child(2) > section:nth-child(2) > p').text
+      
+      user = driver.find_element(By.CSS_SELECTOR, 'article > div:nth-child(1) > div:nth-child(2) > section:nth-child(1) > div:nth-child(2) > div > div > div:nth-child(1) > div > a:nth-child(1)')
+      username = user.find_element(By.CSS_SELECTOR, 'span').text
+      userlink = user.get_attribute('href')
+      
+  
+      
+      metadata = driver.find_element(By.CSS_SELECTOR, 'article > div:nth-child(1) > div:nth-child(2) > section:nth-child(2) > div:nth-of-type(2)')
+      
+      chatting = metadata.find_element(By.CSS_SELECTOR, 'span:nth-child(1)').text
+      watching = metadata.find_element(By.CSS_SELECTOR, 'span:nth-child(3)').text
+      
+      result['time'] = time_text
+      result['description'] = description
+      result['chatting'] = int(chatting.split(' ')[1])
+      result['watching'] = int(watching.split(' ')[1])
+      result['username'] = username
+      result['userlink'] = userlink
+      
+      
+      try:
+        pass
+      except Exception as e:
+        print(f"Error extracting article details: {e}")
 
     driver.quit()
     print('크롤링 완료')

@@ -34,8 +34,16 @@ def crawl():
 
     amount = int(questionary.text("크롤링할 아이템 수를 입력하세요 (기본값 10):", default="10").ask())
     keyword = questionary.text("검색어를 입력하세요:").ask()
+    has_price_range = questionary.confirm("가격대를 입력하시겠습니까?", default=False).ask()
+    
+    if not has_price_range:
+        start_price = None
+        end_price = None
+    else:
+        start_price = int(questionary.text("최소 가격을 입력하세요 (기본값 0):", default='0').ask())
+        end_price = int(questionary.text("최대 가격을 입력하세요 (기본값 0):", default='0').ask())
 
-    results = get_items(location_id, amount, keyword)
+    results = get_items(location_id, amount, keyword, start_price, end_price)
     
     # print(json.dumps(results, ensure_ascii=False , indent=2))
     

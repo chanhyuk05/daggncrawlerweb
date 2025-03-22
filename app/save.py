@@ -1,7 +1,6 @@
 import os
 from io import BytesIO
 
-import requests
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image as ExcelImage
 from openpyxl.styles import Alignment, Border, Font, Side
@@ -12,7 +11,7 @@ def save_as_excel(results):
     filename = "output.xlsx"
     wb = Workbook()
     ws = wb.active
-    ws.append(["제목", "가격", "상태", "링크"])
+    ws.append(["제목", "가격", "링크", "채팅", "조회", "등록일", "작성자", "설명"])
 
     default_font = Font(size=14)
     header_font = Font(size=16, bold=True)
@@ -35,14 +34,25 @@ def save_as_excel(results):
         # Insert values into columns B to E
         ws.cell(row=idx, column=1, value=item["title"])
         ws.cell(row=idx, column=2, value=item["price"])
-        ws.cell(row=idx, column=3, value=item["status"])
         
-        link_cell = ws.cell(row=idx, column=4, value="링크")
+        link_cell = ws.cell(row=idx, column=3, value="링크")
         link_cell.hyperlink = item["link"]
         link_cell.style = "Hyperlink"
+        
+        ws.cell(row=idx, column=4, value=item["chatting"])
+        ws.cell(row=idx, column=5, value=item["watching"])
+        ws.cell(row=idx, column=6, value=item["time"])
+        
+        user_cell = ws.cell(row=idx, column=7, value=item["username"])
+        user_cell.hyperlink = item["userlink"]
+        user_cell.style = "Hyperlink"
+        
+        ws.cell(row=idx, column=8, value=item["description"])
+        
+        
 
         # Style and align each cell
-        for col_idx in range(1, 5):
+        for col_idx in range(1, 9):
             cell = ws.cell(row=idx, column=col_idx)
             cell.font = default_font
             cell.alignment = center_align
