@@ -14,23 +14,48 @@ from app.save import save_as_excel
 @click.command()
 def crawl():
     region_keyword = questionary.text("크롤링할 지역명을 입력하세요:").ask()
+    
+    is_multiple_region = questionary.confirm("여러 지역을 크롤링하시겠습니까?", default=False).ask()
+    
+    if not is_multiple_region:
+        location_choices = get_location(region_keyword)
+        
+        if not location_choices:
+            print("해당 지역에 대한 결과가 없습니다.")
+            return
 
-    location_choices = get_location(region_keyword)
-
-    if not location_choices:
-        print("해당 지역에 대한 결과가 없습니다.")
-        return
-
-    if len(location_choices) == 1:
-        loc = location_choices[0]
-        location_id = f"{loc['name']}-{loc['id']}"
+        if len(location_choices) == 1:
+            loc = location_choices[0]
+            location_id = f"{loc['name']}-{loc['id']}"
+        else:
+            selected_location = questionary.select(
+                "지역을 선택하세요:",
+                choices=[loc["label"] for loc in location_choices]
+            ).ask()
+            selected_loc = next(loc for loc in location_choices if loc["label"] == selected_location)
+            location_id = f"{selected_loc['name']}-{selected_loc['id']}"
+            
     else:
-        selected_location = questionary.select(
+        location_id = []
+        
+        location_choices = get_location(region_keyword)
+        
+        if not location_choices:
+            print("해당 지역에 대한 결과가 없습니다.")
+            return
+        
+        # location_labels = [loc["label"] for loc in location_choices]
+
+        selected_locations = questionary.checkbox(
             "지역을 선택하세요:",
-            choices=[loc["label"] for loc in location_choices]
+            choices=[
+                questionary.Choice(title=loc["label"], checked=True) for loc in location_choices
+            ]
         ).ask()
-        selected_loc = next(loc for loc in location_choices if loc["label"] == selected_location)
-        location_id = f"{selected_loc['name']}-{selected_loc['id']}"
+        
+        for selected_location in selected_locations:
+            selected_loc = next(loc for loc in location_choices if loc["label"] == selected_location)
+            location_id.append(f"{selected_loc['name']}-{selected_loc['id']}")
 
     amount = int(questionary.text("크롤링할 아이템 수를 입력하세요 (기본값 10):", default="10").ask())
     keyword = questionary.text("검색어를 입력하세요:").ask()

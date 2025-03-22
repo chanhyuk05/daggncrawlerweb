@@ -2,8 +2,7 @@ import os
 from io import BytesIO
 
 from openpyxl import Workbook
-from openpyxl.drawing.image import Image as ExcelImage
-from openpyxl.styles import Alignment, Border, Font, Side
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 
 def save_as_excel(results):
@@ -11,10 +10,12 @@ def save_as_excel(results):
     filename = "output.xlsx"
     wb = Workbook()
     ws = wb.active
-    ws.append(["제목", "가격", "채팅", "조회", "등록일", "작성자", "설명"])
+    ws.title = "당근마켓 결과"
+    ws.sheet_properties.tabColor = "1072BA"
+    ws.append(["제목", "가격", "지역", "채팅", "조회", "등록일", "작성자", "설명"])
 
-    default_font = Font(size=14)
-    header_font = Font(size=16, bold=True)
+    default_font = Font(size=12)
+    header_font = Font(size=14, bold=True)
     center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
     thin_border = Border(
         left=Side(style="thin"),
@@ -22,46 +23,51 @@ def save_as_excel(results):
         top=Side(style="thin"),
         bottom=Side(style="thin")
     )
+    header_fill = PatternFill(start_color="DCE6F1", end_color="DCE6F1", fill_type="solid")
 
     for cell in ws[1]:
         cell.font = header_font
         cell.alignment = center_align
         cell.border = thin_border
-
-    ws.column_dimensions["A"].width = 40
+        cell.fill = header_fill
 
     for idx, item in enumerate(results, start=2):
-        # Insert values into columns B to E
         title_cell = ws.cell(row=idx, column=1, value=item["title"])
         title_cell.hyperlink = item["link"]
         title_cell.style = "Hyperlink"
         
         ws.cell(row=idx, column=2, value=item["price"])
+        ws.cell(row=idx, column=3, value=item["location"])
+        ws.cell(row=idx, column=4, value=item["chatting"])
+        ws.cell(row=idx, column=5, value=item["watching"])
+        ws.cell(row=idx, column=6, value=item["time"])
         
-        ws.cell(row=idx, column=3, value=item["chatting"])
-        ws.cell(row=idx, column=4, value=item["watching"])
-        ws.cell(row=idx, column=5, value=item["time"])
-        
-        user_cell = ws.cell(row=idx, column=6, value=item["username"])
+        user_cell = ws.cell(row=idx, column=7, value=item["username"])
         user_cell.hyperlink = item["userlink"]
         user_cell.style = "Hyperlink"
         
-        ws.cell(row=idx, column=7, value=item["description"])
+        ws.cell(row=idx, column=8, value=item["description"])
         
-        
-
         # Style and align each cell
-        for col_idx in range(1, 8):
+        for col_idx in range(1, 9):
             cell = ws.cell(row=idx, column=col_idx)
             cell.font = default_font
             cell.alignment = center_align
             cell.border = thin_border
-            if cell.value:
-                current_width = ws.column_dimensions[cell.column_letter].width or 10
-                new_width = max(current_width, len(str(cell.value)) * 1.2)
-                ws.column_dimensions[cell.column_letter].width = new_width
 
         # Adjust row height
         ws.row_dimensions[idx].height = 65
+
+    for column_cells in ws.columns:
+        max_length = 0
+        column = column_cells[0].column_letter
+        for cell in column_cells:
+            try:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        adjusted_width = max(max_length * 1.2, 12)  # 12 is the minimum width
+        ws.column_dimensions[column].width = adjusted_width
 
     wb.save(filename)
