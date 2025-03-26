@@ -43,19 +43,11 @@ def crawl():
         if not location_choices:
             print("해당 지역에 대한 결과가 없습니다.")
             return
-        
-        # location_labels = [loc["label"] for loc in location_choices]
 
-        selected_locations = questionary.checkbox(
-            "지역을 선택하세요:",
-            choices=[
-                questionary.Choice(title=loc["label"], checked=True) for loc in location_choices
-            ]
-        ).ask()
+        selected_locations = location_choices
         
         for selected_location in selected_locations:
-            selected_loc = next(loc for loc in location_choices if loc["label"] == selected_location)
-            location_id.append(f"{selected_loc['name']}-{selected_loc['id']}")
+            location_id.append(f"{selected_location['name']}-{selected_location['id']}")
 
     amount = int(questionary.text("크롤링할 아이템 수를 입력하세요 (기본값 10):", default="10").ask())
     keyword = questionary.text("검색어를 입력하세요:").ask()
