@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173"
+    "https://web-carrotweb-m8zb10fg23bf6735.sel4.cloudtype.app"
 ]
 
 app.add_middleware(
