@@ -10,10 +10,15 @@ def get_items(location_id: str | list[str], amount: int, search_keyword: str, st
       
     # print(url)
 
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(options=options)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.set_capability('browserless:token', 'S3Pc72Rgvfkbfl21c8e135b203b982cbcbb5b5efb8')
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--headless")
+
+    driver = webdriver.Remote(
+    command_executor='https://chrome.browserless.io/webdriver',
+    options=chrome_options
+    )
 
     results = []
     
